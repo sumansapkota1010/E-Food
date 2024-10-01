@@ -124,12 +124,6 @@ exports.verifyOtp = async (req, res) => {
     });
   }
 
-  if (!userExists.otp) {
-    return res.status(400).json({
-      message: "OTP has already been used or does not exist",
-    });
-  }
-
   if (userExists.otp !== otp) {
     return res.status(400).json({
       message: "Invalid OTP",
@@ -137,6 +131,7 @@ exports.verifyOtp = async (req, res) => {
   }
   // OTP is correct, dispose of it by setting it to undefined
   userExists.otp = undefined;
+  userExists.isOtpVerified = true;
   await userExists.save();
 
   res.status(200).json({
@@ -162,7 +157,13 @@ exports.resetPassword = async (req, res) => {
       message: "User is not registered",
     });
   }
+  if (userExists[0].isOtpVerified !== true) {
+    return res.status(400).json({
+      message: "You don't have permission to change password",
+    });
+  }
   userExists[0].userPassword = bcrypt.hashSync(newPassword, 10);
+  userExists[0].isOtpVerified = false;
   await userExists[0].save();
   res.status(200).json({
     message: "Password changed successfully",
