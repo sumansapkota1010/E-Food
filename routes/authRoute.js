@@ -6,6 +6,7 @@ const {
   verifyOtp,
   resetPassword,
 } = require("../controller/auth/authController");
+
 const router = express.Router();
 
 router.route("/register").post(register);
